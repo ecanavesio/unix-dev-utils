@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Set default values
+prefix=""
+num_digits=4
+start=1
+step=1
+extension=""
+mode="files"  # By default, we're renaming files.
+
+display_help() {
+    echo "Usage: $0 [options]"
+    echo
+    echo "Options:"
+    echo "  -p, --prefix      Set the filename prefix (default: empty)"
+    echo "  -d, --digits      Set the number of digits for numbering (default: 4)"
+    echo "  -s, --start       Set the starting number (default: 1)"
+    echo "  -S, --step        Set the increment step (default: 1)"
+    echo "  -e, --extension   Only rename files with this extension (default: all files)"
+    echo "  -D, --dirs        Rename directories instead of files"
+    echo "  -h, --help        Display this help message"
+}
+
+# Parse command line arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -p|--prefix) prefix="$2"; shift ;;
+        -d|--digits) num_digits="$2"; shift ;;
+        -s|--start) start="$2"; shift ;;
+        -S|--step) step="$2"; shift ;;
+        -e|--extension) extension="*$2"; shift ;;
+        -D|--dirs) mode="dirs" ;;
+        -h|--help) display_help; exit 0 ;;
+        *) echo "Unknown parameter passed: $1"; display_help; exit 1 ;;
+    esac
+    shift
+done
+
+counter=$start
+
+if [ "$mode" == "files" ]; then
+    items="*${extension}"
+    for file in $items; do
+        if [[ -f "$file" ]]; then
+            format_string="%0${num_digits}d"
+            new_name="${prefix}$(printf "$format_string" $counter).${file##*.}"
+            mv "$file" "$new_name"
+            ((counter+=step))
+        fi
+    done
+else
+    for dir in */; do
+        format_string="%0${num_digits}d"
+        new_name="${prefix}$(printf "$format_string" $counter)"
+        mv "$dir" "$new_name"
+        ((counter+=step))
+    done
+fi

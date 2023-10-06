@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [[ $# -ge 2 ]]; then
+    mkdir -p "$1"
+    for ((i = 2; i <= $#; i++)); do
+        touch "$1/${!i}"
+    done
+else
+    echo "Usage: createfiles <directory_path> <filename1> [<filename2> ...]"
+fi
+
